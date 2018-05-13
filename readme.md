@@ -1,0 +1,20 @@
+# @bitsy/parser
+A Node.js module that parses bitsy gamedata. Only supports palettes and rooms
+at this time.
+## Installation 
+```sh
+npm install @bitsy/parser --save
+yarn add @bitsy/parser
+bower install @bitsy/parser --save
+```
+## Usage
+### Javascript
+```javascript
+var parser = require('@bitsy/parser');
+var boys = parser.BitsyParser.parse(gamedata); // gamedata is an string array of lines
+```
+### TypeScript
+```typescript
+import { BitsyParser } from '@bitsy/parser';
+const world = BitsyParser.parse(gamedata); // gamedata is an string array of lines
+```
