@@ -1,14 +1,25 @@
 {
   "name": "@bitsy/parser",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "parses bitsy gamedata",
   "main": "dist/index.js",
   "types" : "dist/index.d.ts",
   "scripts": {
     "build": "tsc"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ragzouken/npm-bitsy-parser.git"
+  },
+  "keywords": [
+    "bitsy"
+  ],
   "author": "candle",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ragzouken/npm-bitsy-parser/issues"
+  },
+  "homepage":"https://github.com/Ragzouken/npm-bitsy-parser#readme",
   "devDependencies": {
     "typescript": "^2.8.3"
   }
