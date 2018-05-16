@@ -2,26 +2,61 @@ export class BitsyWorld
 {
     public palettes: {[index:string]: BitsyPalette} = {};
     public tiles: {[index:string]: BitsyTile} = {};
+    public sprites: {[index:string]: BitsySprite} = {};
+    public items: {[index:string]: BitsyItem} = {};
 }
 
-export class BitsyTile
+export interface BitsyResource
+{
+    id: string;
+    name: string;
+}
+
+export interface BitsyObject extends BitsyResource
+{
+    graphic: BitsyGraphic;
+    palette: number;
+}
+
+export class BitsyResourceBase implements BitsyResource
 {
     public id: string = "";
     public name: string = "";
+}
+
+export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
+{
     public graphic: BitsyGraphic = [];
+    public palette: number = 1;
+}
+
+export class BitsyTile extends BitsyObjectBase
+{
+    public palette: number = 1;
+}
+
+export class BitsySprite extends BitsyObjectBase
+{
+    public palette: number = 2;
+    public dialogueID: string = "";
+}
+
+export class BitsyItem extends BitsyObjectBase
+{
+    public dialogueID: string = "";
 }
 
 export type BitsyGraphicFrame = boolean[];
 export type BitsyGraphic = BitsyGraphicFrame[];
 
-export class BitsyPalette
+export class BitsyPalette extends BitsyResourceBase
 {
-    public id: string = "";
-    public name: string = "";
     public colors: number[] = [];
 
     public constructor()
     {
+        super();
+
         this.colors = [];
     }
 
@@ -60,6 +95,8 @@ export class BitsyParser
         {
                  if (this.checkLine("PAL")) this.takePalette();
             else if (this.checkLine("TIL")) this.takeTile();
+            else if (this.checkLine("SPR")) this.takeSprite();
+            else if (this.checkLine("ITM")) this.takeItem();
             else
             {
                 while (!this.checkBlank())
@@ -123,23 +160,43 @@ export class BitsyParser
     {
         const [r, g, b] = this.takeSplit(",");
         
-        return (parseInt(r) << 24)
-             | (parseInt(g) << 16)
-             | (parseInt(b) <<  8)
-             | 255;
+        return (parseInt(r) <<  0)
+             | (parseInt(g) <<  8)
+             | (parseInt(b) << 16)
+             | (255         << 24);
     }
 
-    private tryTakeName(object: {"name": string})
+    private takeResourceID(resource: BitsyResource)
     {
-        object.name = this.checkLine("NAME") ? this.takeSplitOnce(" ")[1] : "";
+        resource.id = this.takeSplitOnce(" ")[1];
+    }
+
+    private tryTakeResourceName(resource: BitsyResource)
+    {
+        resource.name = this.checkLine("NAME") ? this.takeSplitOnce(" ")[1] : "";
+    }
+
+    private tryTakeObjectPalette(object: BitsyObject): void
+    {
+        if (this.checkLine("COL"))
+        {
+            object.palette = parseInt(this.takeSplitOnce(" ")[1]);
+        }
+    }
+
+    private tryTakeObjectDialogueID(object: {"dialogueID": string})
+    {
+        if (this.checkLine("DLG"))
+        {
+            object.dialogueID = this.takeSplitOnce(" ")[1];
+        }
     }
 
     private takePalette(): void
     {
         const palette = new BitsyPalette();
-        palette.id = this.takeSplitOnce(" ")[1];
-        
-        this.tryTakeName(palette);
+        this.takeResourceID(palette);
+        this.tryTakeResourceName(palette);
 
         while (!this.checkBlank())
         {
@@ -166,7 +223,7 @@ export class BitsyParser
         return frame;
     }
 
-    private takeGraphic(): BitsyGraphic
+    private takeObjectGraphic(object: BitsyObject): void
     {
         const graphic: BitsyGraphic = [];
 
@@ -176,17 +233,41 @@ export class BitsyParser
         }
         while (this.checkLine(">"));
         
-        return graphic;
+        object.graphic = graphic;
     }
 
     private takeTile(): void
     {
         const tile = new BitsyTile();
-        tile.id = this.takeSplitOnce(" ")[1];
-
-        tile.graphic = this.takeGraphic();
-        this.tryTakeName(tile);
+        this.takeResourceID(tile);
+        this.takeObjectGraphic(tile);
+        this.tryTakeResourceName(tile);
+        this.tryTakeObjectPalette(tile);
 
         this.world.tiles[tile.id] = tile;
+    }
+
+    private takeSprite(): void
+    {
+        const sprite = new BitsySprite();
+        this.takeResourceID(sprite);
+        this.takeObjectGraphic(sprite);
+        this.tryTakeResourceName(sprite);
+        this.tryTakeObjectDialogueID(sprite);
+        this.tryTakeObjectPalette(sprite);
+
+        this.world.sprites[sprite.id] = sprite;
+    }
+
+    private takeItem(): void
+    {
+        const item = new BitsyItem();
+        this.takeResourceID(item);
+        this.takeObjectGraphic(item);
+        this.tryTakeResourceName(item);
+        this.tryTakeObjectDialogueID(item);
+        this.tryTakeObjectPalette(item);
+
+        this.world.items[item.id] = item;
     }
 }
