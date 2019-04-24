@@ -27,6 +27,7 @@ export class BitsyResourceBase implements BitsyResource
 export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
 {
     static paletteDefault: number = 1;
+    static typeName: string = "";
     public graphic: BitsyGraphic = [];
     public palette: number;
     public dialogueID: string = "";
@@ -44,16 +45,19 @@ export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
 export class BitsyTile extends BitsyObjectBase
 {
     static paletteDefault: number = 1;
+    static typeName: string = "TIL";
 }
 
 export class BitsySprite extends BitsyObjectBase
 {
     static paletteDefault: number = 2;
+    static typeName: string = "SPR";
 }
 
 export class BitsyItem extends BitsyObjectBase
 {
     static paletteDefault: number = 2;
+    static typeName: string = "ITM";
 }
 
 export type BitsyGraphicFrame = boolean[];
