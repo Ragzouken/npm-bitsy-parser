@@ -1,3 +1,5 @@
+import { numToRgbString, rgbStringToNum } from "./colourUtils";
+
 export class BitsyWorld
 {
     public palettes: {[index:string]: BitsyPalette} = {};
@@ -131,7 +133,7 @@ export class BitsyPalette extends BitsyResourceBase
     public get sprite(): number { return this.colors[2]; }
     public toString() {
         return `${this.type.typeName} ${this.id}
-${this.colors.map(c => `${(c >> 16) & 255},${(c >> 8) & 255},${c & 255}`).join('\n')}`;
+${this.colors.map(numToRgbString).join('\n')}`;
     }
 }
 
@@ -228,11 +230,7 @@ export class BitsyParser
 
     private takeColor(): number
     {
-        const [r, g, b] = this.takeSplit(",");
-        
-        return (parseInt(b, 10) <<  0)
-             | (parseInt(g, 10) <<  8)
-             | (parseInt(r, 10) << 16);
+        return rgbStringToNum(this.takeLine());
     }
 
     private takeResourceID(resource: BitsyResource)
