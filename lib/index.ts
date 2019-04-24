@@ -15,7 +15,7 @@ TODO: version
 
 TODO: room format
 
-TODO: palettes
+${valuesToString(this.palettes)}
 
 TODO: rooms
 
@@ -129,6 +129,10 @@ export class BitsyPalette extends BitsyResourceBase
     public get background(): number { return this.colors[0]; }
     public get tile(): number { return this.colors[1]; }
     public get sprite(): number { return this.colors[2]; }
+    public toString() {
+        return `${this.type.typeName} ${this.id}
+${this.colors.map(c => `${(c >> 16) & 255},${(c >> 8) & 255},${c & 255}`).join('\n')}`;
+    }
 }
 
 export class BitsyParser
