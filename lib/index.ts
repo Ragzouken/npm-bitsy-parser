@@ -31,8 +31,11 @@ export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
     public palette: number;
     constructor() {
         super();
+        this.palette = this.type.paletteDefault;
+    }
+    get type() {
         const bob = <typeof BitsyObjectBase>this.constructor;
-        this.palette = bob.paletteDefault;
+        return bob;
     }
 }
 
