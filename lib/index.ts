@@ -45,6 +45,7 @@ export class BitsySprite extends BitsyObjectBase
 {
     static paletteDefault: number = 2;
     public dialogueID: string = "";
+    public position?: { room: String, x: Number, y: Number };
 }
 
 export class BitsyItem extends BitsyObjectBase
@@ -199,6 +200,16 @@ export class BitsyParser
         }
     }
 
+    private tryTakeSpritePosition(sprite: BitsySprite)
+    {
+        if (this.checkLine("POS"))
+        {
+            const [room, pos] = this.takeSplitOnce(" ")[1].split(" ");
+            const [x, y] = pos.split(",");
+            sprite.position = { room, x: parseInt(x, 10), y: parseInt(y, 10) };
+        }
+    }
+
     private takePalette(): void
     {
         const palette = new BitsyPalette();
@@ -266,6 +277,7 @@ export class BitsyParser
         this.takeObjectGraphic(sprite);
         this.tryTakeResourceName(sprite);
         this.tryTakeObjectDialogueID(sprite);
+        this.tryTakeSpritePosition(sprite);
         this.tryTakeObjectPalette(sprite);
 
         this.world.sprites[sprite.id] = sprite;
