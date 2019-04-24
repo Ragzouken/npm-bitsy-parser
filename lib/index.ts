@@ -4,6 +4,31 @@ export class BitsyWorld
     public tiles: {[index:string]: BitsyTile} = {};
     public sprites: {[index:string]: BitsySprite} = {};
     public items: {[index:string]: BitsyItem} = {};
+    public toString() {
+        function valuesToString(obj: {[index:string]: BitsyResource}) {
+            return Object.keys(obj).map(s => obj[s].toString()).join('\n\n');
+        }
+        return `
+TODO: title
+
+TODO: version
+
+TODO: room format
+
+TODO: palettes
+
+TODO: rooms
+
+${valuesToString(this.tiles)}
+
+${valuesToString(this.sprites)}
+
+${valuesToString(this.items)}
+
+TODO: dialogue
+
+TODO: variables`
+    }
 }
 
 export interface BitsyResource
@@ -41,6 +66,27 @@ export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
         const bob = <typeof BitsyObjectBase>this.constructor;
         return bob;
     }
+    public toString() {
+        const props = [];
+        props.push(`${this.type.typeName} ${this.id}`);
+        props.push(this.graphic.map(g => g.map(b => b ? 1 : 0).join(',').replace(/((?:.,){7}.),/g, '$1\n')).join('\n>\n'));
+        if (this.name) {
+            props.push(`NAME ${this.name}`);
+        }
+        if (this.dialogueID) {
+            props.push(`DLG ${this.dialogueID}`);
+        }
+        if (this.position) {
+            props.push(`POS ${this.position.room} ${this.position.x},${this.position.y}`);
+        }
+        if (this.wall) {
+            props.push(`WAL true`);
+        }
+        if (this.palette !== this.type.paletteDefault) {
+            props.push(`COL ${this.palette}`);
+        }
+        return props.join('\n');
+    };
 }
 
 export class BitsyTile extends BitsyObjectBase
