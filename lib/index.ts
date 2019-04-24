@@ -45,14 +45,18 @@ export interface BitsyObject extends BitsyResource
 
 export class BitsyResourceBase implements BitsyResource
 {
+    static typeName: string = "";
     public id: string = "";
     public name: string = "";
+    get type() {
+        const brb = <typeof BitsyResourceBase>this.constructor;
+        return brb;
+    }
 }
 
 export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
 {
     static paletteDefault: number = 1;
-    static typeName: string = "";
     public graphic: BitsyGraphic = [];
     public palette: number;
     public dialogueID: string = "";
@@ -112,6 +116,7 @@ export type BitsyGraphic = BitsyGraphicFrame[];
 
 export class BitsyPalette extends BitsyResourceBase
 {
+    static typeName: string = "PAL";
     public colors: number[] = [];
 
     public constructor()
