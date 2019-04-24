@@ -32,6 +32,7 @@ export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
     public palette: number;
     public dialogueID: string = "";
     public position?: { room: String, x: Number, y: Number };
+    public wall: boolean = false;
     constructor() {
         super();
         this.palette = this.type.paletteDefault;
@@ -216,6 +217,14 @@ export class BitsyParser
         }
     }
 
+    private tryTakeTileWall(tile: BitsyObjectBase)
+    {
+        if (this.checkLine("WAL"))
+        {
+            tile.wall = this.takeSplitOnce(" ")[1] === "true";
+        }
+    }
+
     private takePalette(): void
     {
         const palette = new BitsyPalette();
@@ -271,6 +280,7 @@ export class BitsyParser
         this.takeResourceID(tile);
         this.takeObjectGraphic(tile);
         this.tryTakeResourceName(tile);
+        this.tryTakeTileWall(tile);
         this.tryTakeObjectPalette(tile);
 
         this.world.tiles[tile.id] = tile;
