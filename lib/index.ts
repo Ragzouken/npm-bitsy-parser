@@ -29,6 +29,8 @@ export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
     static paletteDefault: number = 1;
     public graphic: BitsyGraphic = [];
     public palette: number;
+    public dialogueID: string = "";
+    public position?: { room: String, x: Number, y: Number };
     constructor() {
         super();
         this.palette = this.type.paletteDefault;
@@ -47,14 +49,11 @@ export class BitsyTile extends BitsyObjectBase
 export class BitsySprite extends BitsyObjectBase
 {
     static paletteDefault: number = 2;
-    public dialogueID: string = "";
-    public position?: { room: String, x: Number, y: Number };
 }
 
 export class BitsyItem extends BitsyObjectBase
 {
     static paletteDefault: number = 2;
-    public dialogueID: string = "";
 }
 
 export type BitsyGraphicFrame = boolean[];
@@ -203,7 +202,7 @@ export class BitsyParser
         }
     }
 
-    private tryTakeSpritePosition(sprite: BitsySprite)
+    private tryTakeSpritePosition(sprite: BitsyObjectBase)
     {
         if (this.checkLine("POS"))
         {
