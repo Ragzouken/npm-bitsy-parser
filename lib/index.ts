@@ -234,12 +234,17 @@ export class BitsyParser
     {
         const graphic: BitsyGraphic = [];
 
+        let moreFrames;
         do
         {
             graphic.push(this.takeFrame());
+            moreFrames = this.checkLine(">");
+            if(moreFrames) {
+                this.skipLine();
+            }
         }
-        while (this.checkLine(">"));
-        
+        while (moreFrames);
+
         object.graphic = graphic;
     }
 
