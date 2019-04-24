@@ -26,23 +26,30 @@ export class BitsyResourceBase implements BitsyResource
 
 export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
 {
+    static paletteDefault: number = 1;
     public graphic: BitsyGraphic = [];
-    public palette: number = 1;
+    public palette: number;
+    constructor() {
+        super();
+        const bob = <typeof BitsyObjectBase>this.constructor;
+        this.palette = bob.paletteDefault;
+    }
 }
 
 export class BitsyTile extends BitsyObjectBase
 {
-    public palette: number = 1;
+    static paletteDefault: number = 1;
 }
 
 export class BitsySprite extends BitsyObjectBase
 {
-    public palette: number = 2;
+    static paletteDefault: number = 2;
     public dialogueID: string = "";
 }
 
 export class BitsyItem extends BitsyObjectBase
 {
+    static paletteDefault: number = 2;
     public dialogueID: string = "";
 }
 
