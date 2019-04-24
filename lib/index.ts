@@ -56,7 +56,7 @@ export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
     public graphic: BitsyGraphic = [];
     public palette: number;
     public dialogueID: string = "";
-    public position?: { room: String, x: Number, y: Number };
+    public position?: { room: string, x: number, y: number };
     public wall: boolean = false;
     constructor() {
         super();
