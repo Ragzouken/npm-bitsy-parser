@@ -221,10 +221,9 @@ export class BitsyParser
     {
         const [r, g, b] = this.takeSplit(",");
         
-        return (parseInt(r) <<  0)
-             | (parseInt(g) <<  8)
-             | (parseInt(b) << 16)
-             | (255         << 24);
+        return (parseInt(b, 10) <<  0)
+             | (parseInt(g, 10) <<  8)
+             | (parseInt(r, 10) << 16);
     }
 
     private takeResourceID(resource: BitsyResource)
