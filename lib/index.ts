@@ -15,6 +15,7 @@ export class BitsyWorld
     public tiles: {[index:string]: BitsyTile} = {};
     public sprites: {[index:string]: BitsySprite} = {};
     public items: {[index:string]: BitsyItem} = {};
+    public dialogue: {[index:string]: BitsyDialogue} = {};
     public variables: {[index:string]: BitsyVariable} = {};
     public toString() {
         function valuesToString(obj: {[index:string]: BitsyResource}) {
@@ -36,7 +37,7 @@ ${valuesToString(this.sprites)}
 
 ${valuesToString(this.items)}
 
-TODO: dialogue
+${valuesToString(this.dialogue)}
 
 ${valuesToString(this.variables)}`
     }
@@ -162,6 +163,17 @@ export class BitsyRoom extends BitsyResourceBase
     }
 }
 
+export class BitsyDialogue extends BitsyResourceBase
+{
+    static typeName: string = "DLG";
+    public script: string = "";
+
+    public toString() {
+        return `${super.toString()}
+${this.script}`;
+    }
+}
+
 export class BitsyVariable extends BitsyResourceBase
 {
     static typeName: string = "VAR";
@@ -216,6 +228,7 @@ export class BitsyParser
             else if (this.checkLine("TIL")) this.takeTile();
             else if (this.checkLine("SPR")) this.takeSprite();
             else if (this.checkLine("ITM")) this.takeItem();
+            else if (this.checkLine("DLG")) this.takeDialogue();
             else if (this.checkLine("VAR")) this.takeVariable();
             else
             {
@@ -386,6 +399,19 @@ export class BitsyParser
         room.palette = this.takeSplitOnce(" ")[1];
     }
 
+    private takeDialogueScript(dialogue: BitsyDialogue) {
+        if (this.checkLine('"""')) {
+            const lines = [this.takeLine()];
+            while (!this.checkLine('"""')) {
+                lines.push(this.takeLine());
+            }
+            lines.push(this.takeLine());
+            dialogue.script = lines.join('\n');
+        } else {
+            dialogue.script = this.takeLine();
+        }
+    }
+
     private takeFrame(): BitsyGraphicFrame
     {
         const frame: BitsyGraphicFrame = new Array(64).fill(false);
@@ -456,6 +482,15 @@ export class BitsyParser
         this.tryTakeObjectPalette(item);
 
         this.world.items[item.id] = item;
+    }
+
+    private takeDialogue(): void
+    {
+        const dialogue = new BitsyDialogue();
+        this.takeResourceID(dialogue);
+        this.takeDialogueScript(dialogue);
+
+        this.world.dialogue[dialogue.id] = dialogue;
     }
 
     private takeVariable(): void
