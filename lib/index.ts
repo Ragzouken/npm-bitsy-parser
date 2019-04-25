@@ -7,6 +7,9 @@ function parsePosition(str: string) {
 
 export class BitsyWorld
 {
+    public title: string = "";
+    public bitsyVersion: string = "";
+    public roomFormat: number = 1;
     public rooms: {[index:string]: BitsyRoom} = {};
     public palettes: {[index:string]: BitsyPalette} = {};
     public tiles: {[index:string]: BitsyTile} = {};
@@ -16,12 +19,11 @@ export class BitsyWorld
         function valuesToString(obj: {[index:string]: BitsyResource}) {
             return Object.keys(obj).map(s => obj[s].toString()).join('\n\n');
         }
-        return `
-TODO: title
+        return `${this.title}
 
-TODO: version
+# BITSY VERSION ${this.bitsyVersion}
 
-TODO: room format
+! ROOM_FORMAT ${this.roomFormat}
 
 ${valuesToString(this.palettes)}
 
@@ -184,6 +186,16 @@ export class BitsyParser
     {
         this.reset();
         this.lines = lines;
+
+        this.world.title = this.takeLine();
+        while(!this.done && !this.checkLine("# BITSY VERSION ")) {
+            this.skipLine();
+        }
+        this.world.bitsyVersion = this.takeSplitOnce("# BITSY VERSION ")[1];
+        while(!this.done && !this.checkLine("! ROOM_FORMAT ")) {
+            this.skipLine();
+        }
+        this.world.roomFormat = parseInt(this.takeSplitOnce("! ROOM_FORMAT ")[1], 10);
 
         while (!this.done)
         {
