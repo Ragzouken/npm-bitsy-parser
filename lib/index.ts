@@ -1,5 +1,10 @@
 import { numToRgbString, rgbStringToNum } from "./colourUtils";
 
+function parsePosition(str: string) {
+    const [x, y] = str.split(",").map(n => parseInt(n, 10));
+    return { x, y };
+}
+
 export class BitsyWorld
 {
     public rooms: {[index:string]: BitsyRoom} = {};
@@ -279,8 +284,7 @@ export class BitsyParser
         if (this.checkLine("POS"))
         {
             const [room, pos] = this.takeSplitOnce(" ")[1].split(" ");
-            const [x, y] = pos.split(",");
-            sprite.position = { room, x: parseInt(x, 10), y: parseInt(y, 10) };
+            sprite.position = { room, ...parsePosition(pos) };
         }
     }
 
@@ -335,23 +339,19 @@ export class BitsyParser
     private takeRoomItem(room: BitsyRoom) {
         const item = this.takeSplitOnce(" ")[1];
         const [id, pos] = item.split(" ");
-        const [x, y] = pos.split(",");
-        room.items.push({ id, x: parseInt(x, 10), y: parseInt(y, 10) });
+        room.items.push({ id, ...parsePosition(pos) });
     }
 
     private takeRoomExit(room: BitsyRoom) {
         const exit = this.takeSplitOnce(" ")[1];
         const [from, toRoom, toPos, _, transition] = exit.split(" ");
-        const [x, y] = from.split(",");
-        const [toX, toY] = toPos.split(",");
-        room.exits.push({ from: { x: parseInt(x, 10), y: parseInt(y, 10) }, to: { room: toRoom, x: parseInt(toX, 10), y: parseInt(toY, 10) }, transition });
+        room.exits.push({ from: parsePosition(from), to: { room: toRoom, ...parsePosition(toPos) }, transition });
     }
 
     private takeRoomEnding(room: BitsyRoom) {
         const ending = this.takeSplitOnce(" ")[1];
         const [id, pos] = ending.split(" ");
-        const [x, y] = pos.split(",");
-        room.endings.push({ id, x: parseInt(x, 10), y: parseInt(y, 10) });
+        room.endings.push({ id, ...parsePosition(pos) });
     }
 
     private takeRoomPalette(room: BitsyRoom) {
