@@ -15,6 +15,7 @@ export class BitsyWorld
     public tiles: {[index:string]: BitsyTile} = {};
     public sprites: {[index:string]: BitsySprite} = {};
     public items: {[index:string]: BitsyItem} = {};
+    public variables: {[index:string]: BitsyVariable} = {};
     public toString() {
         function valuesToString(obj: {[index:string]: BitsyResource}) {
             return Object.keys(obj).map(s => obj[s].toString()).join('\n\n');
@@ -37,7 +38,7 @@ ${valuesToString(this.items)}
 
 TODO: dialogue
 
-TODO: variables`
+${valuesToString(this.variables)}`
     }
 }
 
@@ -161,6 +162,17 @@ export class BitsyRoom extends BitsyResourceBase
     }
 }
 
+export class BitsyVariable extends BitsyResourceBase
+{
+    static typeName: string = "VAR";
+    public value: string = "";
+
+    public toString() {
+        return `${super.toString()}
+${this.value}`;
+    }
+}
+
 export class BitsyParser
 {
     static parse(lines: string[]): BitsyWorld
@@ -204,6 +216,7 @@ export class BitsyParser
             else if (this.checkLine("TIL")) this.takeTile();
             else if (this.checkLine("SPR")) this.takeSprite();
             else if (this.checkLine("ITM")) this.takeItem();
+            else if (this.checkLine("VAR")) this.takeVariable();
             else
             {
                 while (!this.checkBlank())
@@ -443,5 +456,14 @@ export class BitsyParser
         this.tryTakeObjectPalette(item);
 
         this.world.items[item.id] = item;
+    }
+
+    private takeVariable(): void
+    {
+        const variable = new BitsyVariable();
+        this.takeResourceID(variable);
+        variable.value = this.takeLine();
+
+        this.world.variables[variable.id] = variable;
     }
 }
