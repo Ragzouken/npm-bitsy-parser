@@ -122,13 +122,6 @@ export class BitsyPalette extends BitsyResourceBase
     static typeName: string = "PAL";
     public colors: number[] = [];
 
-    public constructor()
-    {
-        super();
-
-        this.colors = [];
-    }
-
     public get background(): number { return this.colors[0]; }
     public get tile(): number { return this.colors[1]; }
     public get sprite(): number { return this.colors[2]; }
