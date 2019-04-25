@@ -1,6 +1,7 @@
 import { numToRgbString, rgbStringToNum } from "./colourUtils";
 
-function parsePosition(str: string) {
+function parsePosition(str: string)
+{
     const [x, y] = str.split(",").map(n => parseInt(n, 10));
     return { x, y };
 }
@@ -10,15 +11,18 @@ export class BitsyWorld
     public title: string = "";
     public bitsyVersion: string = "";
     public roomFormat: number = 1;
-    public rooms: {[index:string]: BitsyRoom} = {};
-    public palettes: {[index:string]: BitsyPalette} = {};
-    public tiles: {[index:string]: BitsyTile} = {};
-    public sprites: {[index:string]: BitsySprite} = {};
-    public items: {[index:string]: BitsyItem} = {};
-    public dialogue: {[index:string]: BitsyDialogue} = {};
-    public variables: {[index:string]: BitsyVariable} = {};
-    public toString() {
-        function valuesToString(obj: {[index:string]: BitsyResource}) {
+    public rooms: { [index: string]: BitsyRoom } = {};
+    public palettes: { [index: string]: BitsyPalette } = {};
+    public tiles: { [index: string]: BitsyTile } = {};
+    public sprites: { [index: string]: BitsySprite } = {};
+    public items: { [index: string]: BitsyItem } = {};
+    public dialogue: { [index: string]: BitsyDialogue } = {};
+    public variables: { [index: string]: BitsyVariable } = {};
+
+    public toString()
+    {
+        function valuesToString(obj: { [index: string]: BitsyResource })
+        {
             return Object.keys(obj).map(s => obj[s].toString()).join('\n\n');
         }
         return `${this.title}
@@ -60,11 +64,14 @@ export class BitsyResourceBase implements BitsyResource
     static typeName: string = "";
     public id: string = "";
     public name: string = "";
-    get type() {
+
+    get type()
+    {
         const brb = <typeof BitsyResourceBase>this.constructor;
         return brb;
     }
-    public toString() {
+    public toString()
+    {
         return `${this.type.typeName} ${this.id}`;
     }
 }
@@ -77,31 +84,40 @@ export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
     public dialogueID: string = "";
     public position?: { room: string, x: number, y: number };
     public wall: boolean = false;
-    constructor() {
+
+    constructor()
+    {
         super();
         this.palette = this.type.paletteDefault;
     }
-    get type() {
+    get type()
+    {
         const bob = <typeof BitsyObjectBase>this.constructor;
         return bob;
     }
-    public toString() {
+    public toString()
+    {
         const props = [];
         props.push(super.toString());
         props.push(this.graphic.map(g => g.map(b => b ? 1 : 0).join(',').replace(/((?:.,){7}.),/g, '$1\n')).join('\n>\n'));
-        if (this.name) {
+        if (this.name)
+        {
             props.push(`NAME ${this.name}`);
         }
-        if (this.dialogueID) {
+        if (this.dialogueID)
+        {
             props.push(`DLG ${this.dialogueID}`);
         }
-        if (this.position) {
+        if (this.position)
+        {
             props.push(`POS ${this.position.room} ${this.position.x},${this.position.y}`);
         }
-        if (this.wall) {
+        if (this.wall)
+        {
             props.push(`WAL true`);
         }
-        if (this.palette !== this.type.paletteDefault) {
+        if (this.palette !== this.type.paletteDefault)
+        {
             props.push(`COL ${this.palette}`);
         }
         return props.join('\n');
@@ -137,7 +153,8 @@ export class BitsyPalette extends BitsyResourceBase
     public get background(): number { return this.colors[0]; }
     public get tile(): number { return this.colors[1]; }
     public get sprite(): number { return this.colors[2]; }
-    public toString() {
+    public toString()
+    {
         return `${super.toString()}
 ${this.colors.map(numToRgbString).join('\n')}`;
     }
@@ -152,7 +169,8 @@ export class BitsyRoom extends BitsyResourceBase
     public endings: { id: string, x: number, y: number }[] = [];
     public palette: string = "";
 
-    public toString() {
+    public toString()
+    {
         return [
             super.toString(),
             ...this.tiles.map(row => row.join(",")),
@@ -168,7 +186,8 @@ export class BitsyDialogue extends BitsyResourceBase
     static typeName: string = "DLG";
     public script: string = "";
 
-    public toString() {
+    public toString()
+    {
         return `${super.toString()}
 ${this.script}`;
     }
@@ -179,7 +198,8 @@ export class BitsyVariable extends BitsyResourceBase
     static typeName: string = "VAR";
     public value: string = "";
 
-    public toString() {
+    public toString()
+    {
         return `${super.toString()}
 ${this.value}`;
     }
@@ -212,11 +232,13 @@ export class BitsyParser
         this.lines = lines;
 
         this.world.title = this.takeLine();
-        while(!this.done && !this.checkLine("# BITSY VERSION ")) {
+        while (!this.done && !this.checkLine("# BITSY VERSION "))
+        {
             this.skipLine();
         }
         this.world.bitsyVersion = this.takeSplitOnce("# BITSY VERSION ")[1];
-        while(!this.done && !this.checkLine("! ROOM_FORMAT ")) {
+        while (!this.done && !this.checkLine("! ROOM_FORMAT "))
+        {
             this.skipLine();
         }
         this.world.roomFormat = parseInt(this.takeSplitOnce("! ROOM_FORMAT ")[1], 10);
@@ -242,9 +264,9 @@ export class BitsyParser
         }
     }
 
-    private get done(): boolean 
-    { 
-        return this.lineCounter >= this.lines.length; 
+    private get done(): boolean
+    {
+        return this.lineCounter >= this.lines.length;
     }
 
     private get currentLine(): string
@@ -280,13 +302,13 @@ export class BitsyParser
     {
         return this.takeLine().split(delimiter);
     }
-    
-    private takeSplitOnce(delimiter: string) : [string, string]
+
+    private takeSplitOnce(delimiter: string): [string, string]
     {
         const line = this.takeLine();
         const i = line.indexOf(delimiter);
-        
-        return [line.slice(0, i), line.slice(i + delimiter.length)]; 
+
+        return [line.slice(0, i), line.slice(i + delimiter.length)];
     }
 
     private takeColor(): number
@@ -312,7 +334,7 @@ export class BitsyParser
         }
     }
 
-    private tryTakeObjectDialogueID(object: {"dialogueID": string})
+    private tryTakeObjectDialogueID(object: { "dialogueID": string })
     {
         if (this.checkLine("DLG"))
         {
@@ -356,13 +378,16 @@ export class BitsyParser
         const room = new BitsyRoom();
         this.takeResourceID(room);
         this.takeRoomTiles(room);
-        while (this.checkLine("ITM")) {
+        while (this.checkLine("ITM"))
+        {
             this.takeRoomItem(room);
         }
-        while (this.checkLine("EXT")) {
+        while (this.checkLine("EXT"))
+        {
             this.takeRoomExit(room);
         }
-        while (this.checkLine("END")) {
+        while (this.checkLine("END"))
+        {
             this.takeRoomEnding(room);
         }
         this.takeRoomPalette(room);
@@ -370,46 +395,53 @@ export class BitsyParser
         this.world.rooms[room.id] = room;
     }
 
-    private takeRoomTiles(room: BitsyRoom) {
-        for(let i = 0; i < 16; ++i) {
+    private takeRoomTiles(room: BitsyRoom)
+    {
+        for (let i = 0; i < 16; ++i)
+        {
             const row = this.takeSplit(",");
             room.tiles.push(row);
         }
     }
 
-    private takeRoomItem(room: BitsyRoom) {
+    private takeRoomItem(room: BitsyRoom)
+    {
         const item = this.takeSplitOnce(" ")[1];
         const [id, pos] = item.split(" ");
         room.items.push({ id, ...parsePosition(pos) });
     }
 
-    private takeRoomExit(room: BitsyRoom) {
+    private takeRoomExit(room: BitsyRoom)
+    {
         const exit = this.takeSplitOnce(" ")[1];
         const [from, toRoom, toPos, _, transition] = exit.split(" ");
         room.exits.push({ from: parsePosition(from), to: { room: toRoom, ...parsePosition(toPos) }, transition });
     }
 
-    private takeRoomEnding(room: BitsyRoom) {
+    private takeRoomEnding(room: BitsyRoom)
+    {
         const ending = this.takeSplitOnce(" ")[1];
         const [id, pos] = ending.split(" ");
         room.endings.push({ id, ...parsePosition(pos) });
     }
 
-    private takeRoomPalette(room: BitsyRoom) {
+    private takeRoomPalette(room: BitsyRoom)
+    {
         room.palette = this.takeSplitOnce(" ")[1];
     }
 
-    private takeDialogueScript(dialogue: BitsyDialogue) {
-        if (this.checkLine('"""')) {
+    private takeDialogueScript(dialogue: BitsyDialogue)
+    {
+        if (this.checkLine('"""'))
+        {
             const lines = [this.takeLine()];
-            while (!this.checkLine('"""')) {
+            while (!this.checkLine('"""'))
+            {
                 lines.push(this.takeLine());
             }
             lines.push(this.takeLine());
             dialogue.script = lines.join('\n');
-        } else {
-            dialogue.script = this.takeLine();
-        }
+        } else dialogue.script = this.takeLine();
     }
 
     private takeFrame(): BitsyGraphicFrame
@@ -438,7 +470,8 @@ export class BitsyParser
         {
             graphic.push(this.takeFrame());
             moreFrames = this.checkLine(">");
-            if(moreFrames) {
+            if (moreFrames)
+            {
                 this.skipLine();
             }
         }
