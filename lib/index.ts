@@ -534,7 +534,8 @@ export class BitsyParser
         this.world.items[item.id] = item;
     }
 
-    private takeEnding(): void {
+    private takeEnding(): void
+    {
         const ending = new BitsyEnding();
         this.takeResourceID(ending);
         this.takeDialogueScript(ending);
