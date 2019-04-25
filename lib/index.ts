@@ -60,6 +60,9 @@ export class BitsyResourceBase implements BitsyResource
         const brb = <typeof BitsyResourceBase>this.constructor;
         return brb;
     }
+    public toString() {
+        return `${this.type.typeName} ${this.id}`;
+    }
 }
 
 export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
@@ -80,7 +83,7 @@ export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
     }
     public toString() {
         const props = [];
-        props.push(`${this.type.typeName} ${this.id}`);
+        props.push(super.toString());
         props.push(this.graphic.map(g => g.map(b => b ? 1 : 0).join(',').replace(/((?:.,){7}.),/g, '$1\n')).join('\n>\n'));
         if (this.name) {
             props.push(`NAME ${this.name}`);
@@ -131,7 +134,7 @@ export class BitsyPalette extends BitsyResourceBase
     public get tile(): number { return this.colors[1]; }
     public get sprite(): number { return this.colors[2]; }
     public toString() {
-        return `${this.type.typeName} ${this.id}
+        return `${super.toString()}
 ${this.colors.map(numToRgbString).join('\n')}`;
     }
 }
@@ -147,7 +150,7 @@ export class BitsyRoom extends BitsyResourceBase
 
     public toString() {
         return [
-            `${this.type.typeName} ${this.id}`,
+            super.toString(),
             ...this.tiles.map(row => row.join(",")),
             ...this.items.map(({ id, x, y }) => `ITM ${id} ${x},${y}`),
             ...this.exits.map(({ from, to, transition }) => `EXT ${from.x},${from.y} ${to.room} ${to.x},${to.y}${transition ? ` FX ${transition}` : ""}`),
