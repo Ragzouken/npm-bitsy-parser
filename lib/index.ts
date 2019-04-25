@@ -2,6 +2,7 @@ import { numToRgbString, rgbStringToNum } from "./colourUtils";
 
 export class BitsyWorld
 {
+    public rooms: {[index:string]: BitsyRoom} = {};
     public palettes: {[index:string]: BitsyPalette} = {};
     public tiles: {[index:string]: BitsyTile} = {};
     public sprites: {[index:string]: BitsySprite} = {};
@@ -19,7 +20,7 @@ TODO: room format
 
 ${valuesToString(this.palettes)}
 
-TODO: rooms
+${valuesToString(this.rooms)}
 
 ${valuesToString(this.tiles)}
 
@@ -137,6 +138,26 @@ ${this.colors.map(numToRgbString).join('\n')}`;
     }
 }
 
+export class BitsyRoom extends BitsyResourceBase
+{
+    static typeName: string = "ROOM";
+    public tiles: string[][] = [];
+    public items: { id: string, x: number, y: number }[] = [];
+    public exits: { from: { x: number, y: number }, to: { room: string, x: number, y: number }, transition: string }[] = [];
+    public endings: { id: string, x: number, y: number }[] = [];
+    public palette: string = "";
+
+    public toString() {
+        return [
+            `${this.type.typeName} ${this.id}`,
+            ...this.tiles.map(row => row.join(",")),
+            ...this.items.map(({ id, x, y }) => `ITM ${id} ${x},${y}`),
+            ...this.exits.map(({ from, to, transition }) => `EXT ${from.x},${from.y} ${to.room} ${to.x},${to.y}${transition ? ` FX ${transition}` : ""}`),
+            ...this.endings.map(({ id, x, y }) => `END ${id} ${x},${y}`),
+        ].join('\n');
+    }
+}
+
 export class BitsyParser
 {
     static parse(lines: string[]): BitsyWorld
@@ -166,6 +187,7 @@ export class BitsyParser
         while (!this.done)
         {
                  if (this.checkLine("PAL")) this.takePalette();
+            else if (this.checkLine("ROOM")) this.takeRoom();
             else if (this.checkLine("TIL")) this.takeTile();
             else if (this.checkLine("SPR")) this.takeSprite();
             else if (this.checkLine("ITM")) this.takeItem();
@@ -289,6 +311,58 @@ export class BitsyParser
         }
 
         this.world.palettes[palette.id] = palette;
+    }
+
+    private takeRoom(): void
+    {
+        const room = new BitsyRoom();
+        this.takeResourceID(room);
+        this.takeRoomTiles(room);
+        while (this.checkLine("ITM")) {
+            this.takeRoomItem(room);
+        }
+        while (this.checkLine("EXT")) {
+            this.takeRoomExit(room);
+        }
+        while (this.checkLine("END")) {
+            this.takeRoomEnding(room);
+        }
+        this.takeRoomPalette(room);
+
+        this.world.rooms[room.id] = room;
+    }
+
+    private takeRoomTiles(room: BitsyRoom) {
+        for(let i = 0; i < 16; ++i) {
+            const row = this.takeSplit(",");
+            room.tiles.push(row);
+        }
+    }
+
+    private takeRoomItem(room: BitsyRoom) {
+        const item = this.takeSplitOnce(" ")[1];
+        const [id, pos] = item.split(" ");
+        const [x, y] = pos.split(",");
+        room.items.push({ id, x: parseInt(x, 10), y: parseInt(y, 10) });
+    }
+
+    private takeRoomExit(room: BitsyRoom) {
+        const exit = this.takeSplitOnce(" ")[1];
+        const [from, toRoom, toPos, _, transition] = exit.split(" ");
+        const [x, y] = from.split(",");
+        const [toX, toY] = toPos.split(",");
+        room.exits.push({ from: { x: parseInt(x, 10), y: parseInt(y, 10) }, to: { room: toRoom, x: parseInt(toX, 10), y: parseInt(toY, 10) }, transition });
+    }
+
+    private takeRoomEnding(room: BitsyRoom) {
+        const ending = this.takeSplitOnce(" ")[1];
+        const [id, pos] = ending.split(" ");
+        const [x, y] = pos.split(",");
+        room.endings.push({ id, x: parseInt(x, 10), y: parseInt(y, 10) });
+    }
+
+    private takeRoomPalette(room: BitsyRoom) {
+        room.palette = this.takeSplitOnce(" ")[1];
     }
 
     private takeFrame(): BitsyGraphicFrame
