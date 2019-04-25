@@ -17,6 +17,7 @@ export class BitsyWorld
     public sprites: { [index: string]: BitsySprite } = {};
     public items: { [index: string]: BitsyItem } = {};
     public dialogue: { [index: string]: BitsyDialogue } = {};
+    public endings: { [index: string]: BitsyEnding } = {};
     public variables: { [index: string]: BitsyVariable } = {};
 
     public toString()
@@ -42,6 +43,8 @@ ${valuesToString(this.sprites)}
 ${valuesToString(this.items)}
 
 ${valuesToString(this.dialogue)}
+
+${valuesToString(this.endings)}
 
 ${valuesToString(this.variables)}`
     }
@@ -193,6 +196,18 @@ ${this.script}`;
     }
 }
 
+export class BitsyEnding extends BitsyResourceBase
+{
+    static typeName: string = "END";
+    public script: string = "";
+
+    public toString()
+    {
+        return `${super.toString()}
+${this.script}`;
+    }
+}
+
 export class BitsyVariable extends BitsyResourceBase
 {
     static typeName: string = "VAR";
@@ -250,6 +265,7 @@ export class BitsyParser
             else if (this.checkLine("TIL")) this.takeTile();
             else if (this.checkLine("SPR")) this.takeSprite();
             else if (this.checkLine("ITM")) this.takeItem();
+            else if (this.checkLine("END")) this.takeEnding();
             else if (this.checkLine("DLG")) this.takeDialogue();
             else if (this.checkLine("VAR")) this.takeVariable();
             else
@@ -515,6 +531,14 @@ export class BitsyParser
         this.tryTakeObjectPalette(item);
 
         this.world.items[item.id] = item;
+    }
+
+    private takeEnding(): void {
+        const ending = new BitsyEnding();
+        this.takeResourceID(ending);
+        this.takeDialogueScript(ending);
+
+        this.world.endings[ending.id] = ending;
     }
 
     private takeDialogue(): void
