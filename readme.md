@@ -1,5 +1,5 @@
 # @bitsy/parser
-A Node.js module that parses bitsy gamedata. Does not parse rooms or dialogue at this time.
+A Node.js module that parses bitsy gamedata.
 
 ## Installation 
 ```sh
