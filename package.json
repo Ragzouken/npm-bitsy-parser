@@ -1,9 +1,9 @@
 {
   "name": "@bitsy/parser",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "parses bitsy gamedata",
   "main": "dist/index.js",
-  "types" : "dist/index.d.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc"
   },
@@ -19,7 +19,7 @@
   "bugs": {
     "url": "https://github.com/Ragzouken/npm-bitsy-parser/issues"
   },
-  "homepage":"https://github.com/Ragzouken/npm-bitsy-parser#readme",
+  "homepage": "https://github.com/Ragzouken/npm-bitsy-parser#readme",
   "devDependencies": {
     "typescript": "^2.8.3"
   }
