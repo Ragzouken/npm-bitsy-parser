@@ -22,10 +22,6 @@ export class BitsyWorld
 
     public toString()
     {
-        function valuesToString(obj: Record<string, BitsyResource>)
-        {
-            return Object.keys(obj).map(s => obj[s].toString()).join('\n\n');
-        }
         return `${this.title}
 
 # BITSY VERSION ${this.bitsyVersion}
@@ -42,7 +38,7 @@ ${[
     this.endings,
     this.variables
 ]
-    .map(valuesToString)
+    .map(map => Object.values(map).map(i => i.toString()).join('\n\n'))
     .filter(i => i).join('\n\n')}`
     }
 }
