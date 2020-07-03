@@ -8,6 +8,9 @@
     "build": "tsc",
     "prepare": "npm run build"
   },
+  "files": [
+    "dist/*"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Ragzouken/npm-bitsy-parser.git"
