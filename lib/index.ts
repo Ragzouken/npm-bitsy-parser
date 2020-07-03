@@ -188,8 +188,11 @@ export class BitsyDialogue extends BitsyResourceBase
 
     public toString()
     {
-        return `${super.toString()}
-${this.script}`;
+        return `${[
+            super.toString(),
+            this.script,
+            this.name && `NAME ${this.name}`,
+        ].filter(i => i).join('\n')}`;
     }
 }
 
