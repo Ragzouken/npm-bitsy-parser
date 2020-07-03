@@ -295,7 +295,7 @@ export class BitsyParser
 
     private checkLine(check: string): boolean
     {
-        return this.currentLine.startsWith(check);
+        return this.currentLine ? this.currentLine.startsWith(check) : false;
     }
 
     private checkBlank(): boolean
