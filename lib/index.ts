@@ -456,6 +456,7 @@ export class BitsyParser
             lines.push(this.takeLine());
             dialogue.script = lines.join('\n');
         } else dialogue.script = this.takeLine();
+        this.tryTakeResourceName(dialogue);
     }
 
     private takeFrame(): BitsyGraphicFrame
