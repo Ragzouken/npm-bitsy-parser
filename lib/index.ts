@@ -11,18 +11,18 @@ export class BitsyWorld
     public title: string = "";
     public bitsyVersion: string = "";
     public roomFormat: number = 1;
-    public rooms: { [index: string]: BitsyRoom } = {};
-    public palettes: { [index: string]: BitsyPalette } = {};
-    public tiles: { [index: string]: BitsyTile } = {};
-    public sprites: { [index: string]: BitsySprite } = {};
-    public items: { [index: string]: BitsyItem } = {};
-    public dialogue: { [index: string]: BitsyDialogue } = {};
-    public endings: { [index: string]: BitsyEnding } = {};
-    public variables: { [index: string]: BitsyVariable } = {};
+    public rooms: Record<string, BitsyRoom> = {};
+    public palettes: Record<string, BitsyPalette> = {};
+    public tiles: Record<string, BitsyTile> = {};
+    public sprites: Record<string, BitsySprite> = {};
+    public items: Record<string, BitsyItem> = {};
+    public dialogue: Record<string, BitsyDialogue> = {};
+    public endings: Record<string, BitsyEnding> = {};
+    public variables: Record<string, BitsyVariable> = {};
 
     public toString()
     {
-        function valuesToString(obj: { [index: string]: BitsyResource })
+        function valuesToString(obj: Record<string, BitsyResource>)
         {
             return Object.keys(obj).map(s => obj[s].toString()).join('\n\n');
         }
