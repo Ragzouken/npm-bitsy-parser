@@ -151,8 +151,11 @@ export class BitsyPalette extends BitsyResourceBase
     public get sprite(): number { return this.colors[2]; }
     public toString()
     {
-        return `${super.toString()}
-${this.colors.map(numToRgbString).join('\n')}`;
+        return `${[
+            super.toString(),
+            this.name && `NAME ${this.name}`,
+            ...this.colors.map(numToRgbString)
+        ].filter(i => i).join('\n')}`;
     }
 }
 
