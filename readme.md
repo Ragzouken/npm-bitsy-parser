@@ -16,12 +16,12 @@ bower install @bitsy/parser --save
 
 ```javascript
 var parser = require('@bitsy/parser');
-var world = parser.BitsyParser.parse(gamedata); // gamedata is an string array of lines
+var world = parser.BitsyParser.parse(gamedata); // gamedata is a string array of lines
 ```
 
 ### TypeScript
 
 ```typescript
 import { BitsyParser } from '@bitsy/parser';
-const world = BitsyParser.parse(gamedata); // gamedata is an string array of lines
+const world = BitsyParser.parse(gamedata); // gamedata is a string array of lines
 ```
