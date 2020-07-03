@@ -175,6 +175,7 @@ export class BitsyRoom extends BitsyResourceBase
             super.toString(),
             ...this.tiles.map(row => row.join(",")),
             this.name && `NAME ${this.name}`,
+            this.legacyWalls.length && `WAL ${this.legacyWalls.join(',')}`,
             ...this.items.map(({ id, x, y }) => `ITM ${id} ${x},${y}`),
             ...this.exits.map(({ from, to, transition, dialog }) => ['EXT', `${from.x},${from.y}`, to.room, `${to.x},${to.y}`, transition && `FX ${transition}`, dialog && `DLG ${dialog}`].filter(i => i).join(' ')),
             ...this.endings.map(({ id, x, y }) => `END ${id} ${x},${y}`),
