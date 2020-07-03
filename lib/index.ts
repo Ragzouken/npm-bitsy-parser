@@ -32,21 +32,18 @@ export class BitsyWorld
 
 ! ROOM_FORMAT ${this.roomFormat}
 
-${valuesToString(this.palettes)}
-
-${valuesToString(this.rooms)}
-
-${valuesToString(this.tiles)}
-
-${valuesToString(this.sprites)}
-
-${valuesToString(this.items)}
-
-${valuesToString(this.dialogue)}
-
-${valuesToString(this.endings)}
-
-${valuesToString(this.variables)}`
+${[
+    this.palettes,
+    this.rooms,
+    this.tiles,
+    this.sprites,
+    this.items,
+    this.dialogue,
+    this.endings,
+    this.variables
+]
+    .map(valuesToString)
+    .filter(i => i).join('\n\n')}`
     }
 }
 
