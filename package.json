@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "test": "jest",
     "build": "tsc",
     "prepare": "npm run build"
   },
@@ -25,6 +26,9 @@
   },
   "homepage": "https://github.com/Ragzouken/npm-bitsy-parser#readme",
   "devDependencies": {
+    "@types/jest": "^26.0.3",
+    "jest": "^26.1.0",
+    "ts-jest": "^26.1.1",
     "typescript": "^3.9.6"
   }
 }
