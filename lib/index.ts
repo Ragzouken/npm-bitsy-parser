@@ -164,7 +164,7 @@ export class BitsyRoom extends BitsyResourceBase
     static typeName: string = "ROOM";
     public tiles: string[][] = [];
     public items: { id: string, x: number, y: number }[] = [];
-    public exits: { from: { x: number, y: number }, to: { room: string, x: number, y: number }, transition: string }[] = [];
+    public exits: { from: { x: number, y: number }, to: { room: string, x: number, y: number }, transition: string, dialog: string }[] = [];
     public endings: { id: string, x: number, y: number }[] = [];
     public palette: string = "";
 
@@ -432,8 +432,9 @@ export class BitsyParser
     private takeRoomExit(room: BitsyRoom)
     {
         const exit = this.takeSplitOnce(" ")[1];
-        const [from, toRoom, toPos, , transition] = exit.split(" ");
-        room.exits.push({ from: parsePosition(from), to: { room: toRoom, ...parsePosition(toPos) }, transition });
+        const [from, toRoom, toPos, ...rest] = exit.split(" ");
+        const [, transition, dialog] = rest.join(' ').match(/(?:FX\s(.*))?\s?(?:DLG\s(.*))?/) || [];
+        room.exits.push({ from: parsePosition(from), to: { room: toRoom, ...parsePosition(toPos) }, transition, dialog });
     }
 
     private takeRoomEnding(room: BitsyRoom)
