@@ -163,6 +163,7 @@ export class BitsyRoom extends BitsyResourceBase
 {
     static typeName: string = "ROOM";
     public tiles: string[][] = [];
+    public legacyWalls: string[] = [];
     public items: { id: string, x: number, y: number }[] = [];
     public exits: { from: { x: number, y: number }, to: { room: string, x: number, y: number }, transition: string, dialog: string }[] = [];
     public endings: { id: string, x: number, y: number }[] = [];
@@ -396,6 +397,10 @@ export class BitsyParser
         this.takeResourceID(room);
         this.takeRoomTiles(room);
         this.tryTakeResourceName(room);
+        while (this.checkLine("WAL"))
+        {
+            this.takeRoomLegacyWalls(room);
+        }
         while (this.checkLine("ITM"))
         {
             this.takeRoomItem(room);
@@ -420,6 +425,12 @@ export class BitsyParser
             const row = this.takeSplit(",");
             room.tiles.push(row);
         }
+    }
+
+    private takeRoomLegacyWalls(room: BitsyRoom)
+    {
+        const walls = this.takeSplitOnce(" ")[1];
+        room.legacyWalls.push(...walls.split(","));
     }
 
     private takeRoomItem(room: BitsyRoom)
