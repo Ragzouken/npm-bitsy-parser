@@ -179,7 +179,7 @@ export class BitsyRoom extends BitsyResourceBase
             ...this.items.map(({ id, x, y }) => `ITM ${id} ${x},${y}`),
             ...this.exits.map(({ from, to, transition, dialog }) => ['EXT', `${from.x},${from.y}`, to.room, `${to.x},${to.y}`, transition && `FX ${transition}`, dialog && `DLG ${dialog}`].filter(i => i).join(' ')),
             ...this.endings.map(({ id, x, y }) => `END ${id} ${x},${y}`),
-            `PAL ${this.palette}`,
+            this.palette && `PAL ${this.palette}`,
         ].filter(i => i).join('\n');
     }
 }
