@@ -432,7 +432,7 @@ export class BitsyParser
     private takeRoomExit(room: BitsyRoom)
     {
         const exit = this.takeSplitOnce(" ")[1];
-        const [from, toRoom, toPos, _, transition] = exit.split(" ");
+        const [from, toRoom, toPos, , transition] = exit.split(" ");
         room.exits.push({ from: parsePosition(from), to: { room: toRoom, ...parsePosition(toPos) }, transition });
     }
 
