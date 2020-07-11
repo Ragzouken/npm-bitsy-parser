@@ -11,42 +11,35 @@ export class BitsyWorld
     public title: string = "";
     public bitsyVersion: string = "";
     public roomFormat: number = 1;
-    public rooms: { [index: string]: BitsyRoom } = {};
-    public palettes: { [index: string]: BitsyPalette } = {};
-    public tiles: { [index: string]: BitsyTile } = {};
-    public sprites: { [index: string]: BitsySprite } = {};
-    public items: { [index: string]: BitsyItem } = {};
-    public dialogue: { [index: string]: BitsyDialogue } = {};
-    public endings: { [index: string]: BitsyEnding } = {};
-    public variables: { [index: string]: BitsyVariable } = {};
+    public rooms: Record<string, BitsyRoom> = {};
+    public palettes: Record<string, BitsyPalette> = {};
+    public tiles: Record<string, BitsyTile> = {};
+    public sprites: Record<string, BitsySprite> = {};
+    public items: Record<string, BitsyItem> = {};
+    public dialogue: Record<string, BitsyDialogue> = {};
+    public endings: Record<string, BitsyEnding> = {};
+    public variables: Record<string, BitsyVariable> = {};
 
     public toString()
     {
-        function valuesToString(obj: { [index: string]: BitsyResource })
-        {
-            return Object.keys(obj).map(s => obj[s].toString()).join('\n\n');
-        }
         return `${this.title}
 
 # BITSY VERSION ${this.bitsyVersion}
 
 ! ROOM_FORMAT ${this.roomFormat}
 
-${valuesToString(this.palettes)}
-
-${valuesToString(this.rooms)}
-
-${valuesToString(this.tiles)}
-
-${valuesToString(this.sprites)}
-
-${valuesToString(this.items)}
-
-${valuesToString(this.dialogue)}
-
-${valuesToString(this.endings)}
-
-${valuesToString(this.variables)}`
+${[
+    this.palettes,
+    this.rooms,
+    this.tiles,
+    this.sprites,
+    this.items,
+    this.dialogue,
+    this.endings,
+    this.variables
+]
+    .map(map => Object.values(map).map(i => i.toString()).join('\n\n'))
+    .filter(i => i).join('\n\n')}`
     }
 }
 
@@ -158,8 +151,11 @@ export class BitsyPalette extends BitsyResourceBase
     public get sprite(): number { return this.colors[2]; }
     public toString()
     {
-        return `${super.toString()}
-${this.colors.map(numToRgbString).join('\n')}`;
+        return `${[
+            super.toString(),
+            this.name && `NAME ${this.name}`,
+            ...this.colors.map(numToRgbString)
+        ].filter(i => i).join('\n')}`;
     }
 }
 
@@ -167,8 +163,9 @@ export class BitsyRoom extends BitsyResourceBase
 {
     static typeName: string = "ROOM";
     public tiles: string[][] = [];
+    public legacyWalls: string[] = [];
     public items: { id: string, x: number, y: number }[] = [];
-    public exits: { from: { x: number, y: number }, to: { room: string, x: number, y: number }, transition: string }[] = [];
+    public exits: { from: { x: number, y: number }, to: { room: string, x: number, y: number }, transition: string, dialog: string }[] = [];
     public endings: { id: string, x: number, y: number }[] = [];
     public palette: string = "";
 
@@ -177,11 +174,13 @@ export class BitsyRoom extends BitsyResourceBase
         return [
             super.toString(),
             ...this.tiles.map(row => row.join(",")),
+            this.name && `NAME ${this.name}`,
+            this.legacyWalls.length && `WAL ${this.legacyWalls.join(',')}`,
             ...this.items.map(({ id, x, y }) => `ITM ${id} ${x},${y}`),
-            ...this.exits.map(({ from, to, transition }) => `EXT ${from.x},${from.y} ${to.room} ${to.x},${to.y}${transition ? ` FX ${transition}` : ""}`),
+            ...this.exits.map(({ from, to, transition, dialog }) => ['EXT', `${from.x},${from.y}`, to.room, `${to.x},${to.y}`, transition && `FX ${transition}`, dialog && `DLG ${dialog}`].filter(i => i).join(' ')),
             ...this.endings.map(({ id, x, y }) => `END ${id} ${x},${y}`),
-            `PAL ${this.palette}`,
-        ].join('\n');
+            this.palette && `PAL ${this.palette}`,
+        ].filter(i => i).join('\n');
     }
 }
 
@@ -192,8 +191,11 @@ export class BitsyDialogue extends BitsyResourceBase
 
     public toString()
     {
-        return `${super.toString()}
-${this.script}`;
+        return `${[
+            super.toString(),
+            this.script,
+            this.name && `NAME ${this.name}`,
+        ].filter(i => i).join('\n')}`;
     }
 }
 
@@ -293,7 +295,7 @@ export class BitsyParser
 
     private checkLine(check: string): boolean
     {
-        return this.currentLine.startsWith(check);
+        return this.currentLine ? this.currentLine.startsWith(check) : false;
     }
 
     private checkBlank(): boolean
@@ -396,6 +398,10 @@ export class BitsyParser
         this.takeResourceID(room);
         this.takeRoomTiles(room);
         this.tryTakeResourceName(room);
+        while (this.checkLine("WAL"))
+        {
+            this.takeRoomLegacyWalls(room);
+        }
         while (this.checkLine("ITM"))
         {
             this.takeRoomItem(room);
@@ -422,6 +428,12 @@ export class BitsyParser
         }
     }
 
+    private takeRoomLegacyWalls(room: BitsyRoom)
+    {
+        const walls = this.takeSplitOnce(" ")[1];
+        room.legacyWalls.push(...walls.split(","));
+    }
+
     private takeRoomItem(room: BitsyRoom)
     {
         const item = this.takeSplitOnce(" ")[1];
@@ -432,8 +444,9 @@ export class BitsyParser
     private takeRoomExit(room: BitsyRoom)
     {
         const exit = this.takeSplitOnce(" ")[1];
-        const [from, toRoom, toPos, _, transition] = exit.split(" ");
-        room.exits.push({ from: parsePosition(from), to: { room: toRoom, ...parsePosition(toPos) }, transition });
+        const [from, toRoom, toPos, ...rest] = exit.split(" ");
+        const [, transition, dialog] = rest.join(' ').match(/(?:FX\s(.*))?\s?(?:DLG\s(.*))?/) || [];
+        room.exits.push({ from: parsePosition(from), to: { room: toRoom, ...parsePosition(toPos) }, transition, dialog });
     }
 
     private takeRoomEnding(room: BitsyRoom)
@@ -460,6 +473,7 @@ export class BitsyParser
             lines.push(this.takeLine());
             dialogue.script = lines.join('\n');
         } else dialogue.script = this.takeLine();
+        this.tryTakeResourceName(dialogue);
     }
 
     private takeFrame(): BitsyGraphicFrame
