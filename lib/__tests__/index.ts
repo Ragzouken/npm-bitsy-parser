@@ -12,6 +12,6 @@ test.each`
 	${'default'} | ${'7.1'}
 	${'complex'} | ${'7.1' /*includes extended palette, extended animation frames, exit transitions, exit dialog */}
 `('parses and serializes $file sample for bitsy v$version without modifying it', ({ file, version }) => {
-	const gamedata = readFileSync(resolve(__dirname, `./${file}_${version}.txt`), { encoding: 'utf-8' });
+	const gamedata = readFileSync(resolve(__dirname, `./${file}_${version}.txt`), { encoding: 'utf-8' }).replace(/\r/g, '');
 	expect(BitsyParser.parse(gamedata.split('\n')).toString()).toBe(gamedata);
 });
