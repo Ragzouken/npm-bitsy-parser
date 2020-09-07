@@ -1,5 +1,3 @@
-import { numToRgbString, rgbStringToNum } from "./colourUtils";
-
 function parsePosition(str: string)
 {
     const [x, y] = str.split(",").map(n => parseInt(n, 10));
@@ -141,20 +139,21 @@ export class BitsyItem extends BitsyObjectBase
 export type BitsyGraphicFrame = boolean[];
 export type BitsyGraphic = BitsyGraphicFrame[];
 
+export type Color = { r: number, g: number, b: number };
 export class BitsyPalette extends BitsyResourceBase
 {
     static typeName: string = "PAL";
-    public colors: number[] = [];
+    public colors: Color[] = [];
 
-    public get background(): number { return this.colors[0]; }
-    public get tile(): number { return this.colors[1]; }
-    public get sprite(): number { return this.colors[2]; }
+    public get background(): Color { return this.colors[0]; }
+    public get tile(): Color { return this.colors[1]; }
+    public get sprite(): Color { return this.colors[2]; }
     public toString()
     {
         return `${[
             super.toString(),
             this.name && `NAME ${this.name}`,
-            ...this.colors.map(numToRgbString)
+            ...this.colors.map(({r, g, b}) => `${r},${g},${b}`)
         ].filter(i => i).join('\n')}`;
     }
 }
@@ -330,9 +329,10 @@ export class BitsyParser
         return [line.slice(0, i), line.slice(i + delimiter.length)];
     }
 
-    private takeColor(): number
+    private takeColor(): Color
     {
-        return rgbStringToNum(this.takeLine());
+        const [r, g, b] = this.takeLine().split(',').map((component) => parseInt(component, 10));
+        return { r, g, b };
     }
 
     private takeResourceID(resource: BitsyResource)
