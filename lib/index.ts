@@ -474,7 +474,7 @@ export class BitsyParser
         {
             this.takeRoomEnding(room);
         }
-        this.takeRoomPalette(room);
+        if (this.checkLine("PAL ")) room.palette = this.takeSplitOnce(" ")[1];
 
         this.world.rooms[room.id] = room;
     }
@@ -514,11 +514,6 @@ export class BitsyParser
         const ending = this.takeSplitOnce(" ")[1];
         const [id, pos] = ending.split(" ");
         room.endings.push({ id, ...parsePosition(pos) });
-    }
-
-    private takeRoomPalette(room: BitsyRoom)
-    {
-        room.palette = this.takeSplitOnce(" ")[1];
     }
 
     private takeDialogueScript(dialogue: BitsyDialogue)
