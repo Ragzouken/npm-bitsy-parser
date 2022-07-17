@@ -199,6 +199,7 @@ export class BitsyRoom extends BitsyResourceBase
     public exits: { from: { x: number, y: number }, to: { room: string, x: number, y: number }, transition: string, dialog: string }[] = [];
     public endings: { id: string, x: number, y: number }[] = [];
     public palette: string = "";
+    public avatar: string = "";
 
     public toString()
     {
@@ -211,6 +212,7 @@ export class BitsyRoom extends BitsyResourceBase
             ...this.exits.map(({ from, to, transition, dialog }) => ['EXT', `${from.x},${from.y}`, to.room, `${to.x},${to.y}`, transition && `FX ${transition}`, dialog && `DLG ${dialog}`].filter(i => i).join(' ')),
             ...this.endings.map(({ id, x, y }) => `END ${id} ${x},${y}`),
             this.palette && `PAL ${this.palette}`,
+            this.avatar && `AVA ${this.avatar}`,
         ].filter(i => i).join('\n');
     }
 }
@@ -475,6 +477,7 @@ export class BitsyParser
             this.takeRoomEnding(room);
         }
         if (this.checkLine("PAL ")) room.palette = this.takeSplitOnce(" ")[1];
+        if (this.checkLine("AVA ")) room.avatar = this.takeSplitOnce(" ")[1];
 
         this.world.rooms[room.id] = room;
     }
