@@ -17,3 +17,19 @@ test.each`
 	const gamedata = readFileSync(resolve(__dirname, `./${file}_${version}.txt`), { encoding: 'utf-8' }).replace(/\r/g, '');
 	expect(BitsyParser.parse(gamedata.split('\n')).toString()).toBe(gamedata);
 });
+
+test.each`
+	version | major | minor
+	${'2.2'} | ${2} | ${2}
+	${'4.6'} | ${4} | ${6}
+	${'5.1'} | ${5} | ${1}
+	${'6.2'} | ${6} | ${2}
+	${'7.1'} | ${7} | ${1}
+	${'8.0'} | ${8} | ${0}
+	`('full, major, and minor version is defined for bitsy v$version', ({ version, major, minor }) => {
+	const gamedata = readFileSync(resolve(__dirname, `./default_${version}.txt`), { encoding: 'utf-8' }).replace(/\r/g, '');
+	const world = BitsyParser.parse(gamedata.split('\n'));
+	expect(world.bitsyVersion).toBe(version);
+	expect(world.bitsyVersionMajor).toBe(major);
+	expect(world.bitsyVersionMinor).toBe(minor);
+});

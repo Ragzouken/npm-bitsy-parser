@@ -8,7 +8,11 @@ export class BitsyWorld
 {
     public title: string = "";
     public bitsyVersion: string = "";
+    public bitsyVersionMajor: number = 0;
+    public bitsyVersionMinor: number = 0;
     public roomFormat: number = 1;
+    public dialogCompatibility: number = 0;
+    public textMode: number = 0;
     public rooms: Record<string, BitsyRoom> = {};
     public palettes: Record<string, BitsyPalette> = {};
     public tiles: Record<string, BitsyTile> = {};
@@ -24,7 +28,15 @@ export class BitsyWorld
 
 # BITSY VERSION ${this.bitsyVersion}
 
+${
+	this.bitsyVersionMajor >= 8
+		? `! VER_MAJ ${this.bitsyVersionMajor}
+! VER_MIN ${this.bitsyVersionMinor}
 ! ROOM_FORMAT ${this.roomFormat}
+! DLG_COMPAT ${this.dialogCompatibility}
+! TXT_MODE ${this.textMode}`
+		: `! ROOM_FORMAT ${this.roomFormat}`
+}
 
 ${[
     this.palettes,
@@ -254,11 +266,20 @@ export class BitsyParser
             this.skipLine();
         }
         this.world.bitsyVersion = this.takeSplitOnce("# BITSY VERSION ")[1];
-        while (!this.done && !this.checkLine("! ROOM_FORMAT "))
+        while (!this.done && (!this.checkLine("! ")))
         {
             this.skipLine();
         }
-        this.world.roomFormat = parseInt(this.takeSplitOnce("! ROOM_FORMAT ")[1], 10);
+
+        if (this.checkLine("! VER_MAJ")) this.world.bitsyVersionMajor = parseInt(this.takeSplitOnce("! VER_MAJ ")[1], 10);
+        else this.world.bitsyVersionMajor = parseInt(this.world.bitsyVersion.split('.')[0], 10);
+
+        if (this.checkLine("! VER_MIN")) this.world.bitsyVersionMinor = parseInt(this.takeSplitOnce("! VER_MIN ")[1], 10);
+        else this.world.bitsyVersionMinor = parseInt(this.world.bitsyVersion.split('.')[1], 10);
+
+        if (this.checkLine("! ROOM_FORMAT")) this.world.roomFormat = parseInt(this.takeSplitOnce("! ROOM_FORMAT ")[1], 10);
+        if (this.checkLine("! DLG_COMPAT")) this.world.dialogCompatibility = parseInt(this.takeSplitOnce("! DLG_COMPAT ")[1], 10);
+        if (this.checkLine("! TXT_MODE")) this.world.textMode = parseInt(this.takeSplitOnce("! TXT_MODE ")[1], 10);
 
         while (!this.done)
         {
