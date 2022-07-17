@@ -22,6 +22,7 @@ export class BitsyWorld
     public endings: Record<string, BitsyEnding> = {};
     public variables: Record<string, BitsyVariable> = {};
     public tunes: Record<string, BitsyTune> = {};
+    public blips: Record<string, BitsyBlip> = {};
 
     public toString()
     {
@@ -47,9 +48,9 @@ ${[
     this.items,
     this.dialogue,
     this.endings,
-    this.variables
     this.variables,
     this.tunes,
+    this.blips
 ]
     .map(map => Object.values(map).map(i => i.toString()).join('\n\n'))
     .filter(i => i).join('\n\n')}`
@@ -275,6 +276,20 @@ ${this.value}`;
     }
 }
 
+export class BitsyBlip extends BitsyResourceBase
+{
+    static typeName: string = "BLIP";
+    /** value is currently just the raw data as a string, not the actual parameters */
+    // TODO: parse actual parameters
+    public value: string = "";
+
+    public toString()
+    {
+        return `${super.toString()}
+${this.value}`;
+    }
+}
+
 export class BitsyParser
 {
     static parse(lines: string[]): BitsyWorld
@@ -333,6 +348,7 @@ export class BitsyParser
             else if (this.checkLine("DLG")) this.takeDialogue();
             else if (this.checkLine("VAR")) this.takeVariable();
             else if (this.checkLine("TUNE")) this.takeTune();
+            else if (this.checkLine("BLIP")) this.takeBlip();
             else
             {
                 while (!this.checkBlank())
@@ -671,5 +687,18 @@ export class BitsyParser
         tune.value = lines.join('\n');
 
         this.world.tunes[tune.id] = tune;
+    }
+
+    private takeBlip(): void
+    {
+        const blip = new BitsyBlip(this.world);
+        this.takeResourceID(blip);
+        const lines = [];
+        while (!this.checkBlank()) {
+            lines.push(this.takeLine());
+        }
+        blip.value = lines.join('\n');
+
+        this.world.blips[blip.id] = blip;
     }
 }
