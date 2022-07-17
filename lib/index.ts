@@ -65,6 +65,7 @@ export interface BitsyObject extends BitsyResource
     palette: number;
     /** `*` indicates transparent background */
     paletteBackground?: number | '*';
+    blip: string;
 }
 
 export class BitsyResourceBase implements BitsyResource
@@ -98,6 +99,7 @@ export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
     public dialogueID: string = "";
     public position?: { room: string, x: number, y: number };
     public wall: boolean = false;
+    public blip: string = "";
 
     constructor(...args: ConstructorParameters<typeof BitsyResourceBase>)
     {
@@ -138,6 +140,10 @@ export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
         if (this.paletteBackground !== this.type.paletteBackgroundDefault)
         {
             props.push(`BGC ${this.paletteBackground}`);
+        }
+        if (this.blip)
+        {
+            props.push(`BLIP ${this.blip}`);
         }
         return props.join('\n');
     };
@@ -397,6 +403,14 @@ export class BitsyParser
         }
     }
 
+    private tryTakeBlip(object: BitsyObject): void
+    {
+        if (this.checkLine("BLIP"))
+        {
+            object.blip = this.takeSplitOnce(" ")[1];
+        }
+    }
+
     private tryTakeObjectDialogueID(object: { "dialogueID": string })
     {
         if (this.checkLine("DLG"))
@@ -581,6 +595,7 @@ export class BitsyParser
         this.tryTakeSpritePosition(sprite);
         this.tryTakeObjectPalette(sprite);
         this.tryTakePaletteBackground(sprite);
+        this.tryTakeBlip(sprite);
 
         this.world.sprites[sprite.id] = sprite;
     }
@@ -594,6 +609,7 @@ export class BitsyParser
         this.tryTakeObjectDialogueID(item);
         this.tryTakeObjectPalette(item);
         this.tryTakePaletteBackground(item);
+        this.tryTakeBlip(item);
 
         this.world.items[item.id] = item;
     }
