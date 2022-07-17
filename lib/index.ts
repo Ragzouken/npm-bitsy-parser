@@ -21,6 +21,7 @@ export class BitsyWorld
     public dialogue: Record<string, BitsyDialogue> = {};
     public endings: Record<string, BitsyEnding> = {};
     public variables: Record<string, BitsyVariable> = {};
+    public tunes: Record<string, BitsyTune> = {};
 
     public toString()
     {
@@ -47,6 +48,8 @@ ${[
     this.dialogue,
     this.endings,
     this.variables
+    this.variables,
+    this.tunes,
 ]
     .map(map => Object.values(map).map(i => i.toString()).join('\n\n'))
     .filter(i => i).join('\n\n')}`
@@ -258,6 +261,20 @@ ${this.value}`;
     }
 }
 
+export class BitsyTune extends BitsyResourceBase
+{
+    static typeName: string = "TUNE";
+    /** value is currently just the raw data as a string, not the actual parameters */
+    // TODO: parse actual parameters
+    public value: string = "";
+
+    public toString()
+    {
+        return `${super.toString()}
+${this.value}`;
+    }
+}
+
 export class BitsyParser
 {
     static parse(lines: string[]): BitsyWorld
@@ -315,6 +332,7 @@ export class BitsyParser
             else if (this.checkLine("END")) this.takeEnding();
             else if (this.checkLine("DLG")) this.takeDialogue();
             else if (this.checkLine("VAR")) this.takeVariable();
+            else if (this.checkLine("TUNE")) this.takeTune();
             else
             {
                 while (!this.checkBlank())
@@ -640,5 +658,18 @@ export class BitsyParser
         variable.value = this.takeLine();
 
         this.world.variables[variable.id] = variable;
+    }
+
+    private takeTune(): void
+    {
+        const tune = new BitsyTune(this.world);
+        this.takeResourceID(tune);
+        const lines = [];
+        while (!this.checkBlank()) {
+            lines.push(this.takeLine());
+        }
+        tune.value = lines.join('\n');
+
+        this.world.tunes[tune.id] = tune;
     }
 }
