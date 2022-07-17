@@ -71,6 +71,10 @@ export class BitsyResourceBase implements BitsyResource
     public id: string = "";
     public name: string = "";
 
+    constructor(protected world: BitsyWorld)
+    {
+    }
+
     get type()
     {
         const brb = <typeof BitsyResourceBase>this.constructor;
@@ -91,9 +95,9 @@ export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
     public position?: { room: string, x: number, y: number };
     public wall: boolean = false;
 
-    constructor()
+    constructor(...args: ConstructorParameters<typeof BitsyResourceBase>)
     {
-        super();
+        super(...args);
         this.palette = this.type.paletteDefault;
     }
     get type()
@@ -164,8 +168,9 @@ export class BitsyPalette extends BitsyResourceBase
     {
         return `${[
             super.toString(),
-            this.name && `NAME ${this.name}`,
-            ...this.colors.map(({r, g, b}) => `${r},${g},${b}`)
+            this.world.bitsyVersionMajor < 8 && this.name && `NAME ${this.name}`,
+            ...this.colors.map(({r, g, b}) => `${r},${g},${b}`),
+            this.world.bitsyVersionMajor >= 8 && this.name && `NAME ${this.name}`,
         ].filter(i => i).join('\n')}`;
     }
 }
@@ -363,7 +368,7 @@ export class BitsyParser
 
     private tryTakeResourceName(resource: BitsyResource)
     {
-        resource.name = this.checkLine("NAME") ? this.takeSplitOnce(" ")[1] : "";
+        resource.name = this.checkLine("NAME") ? this.takeSplitOnce(" ")[1] : resource.name;
     }
 
     private tryTakeObjectPalette(object: BitsyObject): void
@@ -401,21 +406,23 @@ export class BitsyParser
 
     private takePalette(): void
     {
-        const palette = new BitsyPalette();
+        const palette = new BitsyPalette(this.world);
         this.takeResourceID(palette);
         this.tryTakeResourceName(palette);
 
-        while (!this.checkBlank())
+        while (!this.checkBlank() && !this.checkLine("NAME "))
         {
             palette.colors.push(this.takeColor());
         }
+
+        this.tryTakeResourceName(palette);
 
         this.world.palettes[palette.id] = palette;
     }
 
     private takeRoom(): void
     {
-        const room = new BitsyRoom();
+        const room = new BitsyRoom(this.world);
         this.takeResourceID(room);
         this.takeRoomTiles(room);
         this.tryTakeResourceName(room);
@@ -535,7 +542,7 @@ export class BitsyParser
 
     private takeTile(): void
     {
-        const tile = new BitsyTile();
+        const tile = new BitsyTile(this.world);
         this.takeResourceID(tile);
         this.takeObjectGraphic(tile);
         this.tryTakeResourceName(tile);
@@ -547,7 +554,7 @@ export class BitsyParser
 
     private takeSprite(): void
     {
-        const sprite = new BitsySprite();
+        const sprite = new BitsySprite(this.world);
         this.takeResourceID(sprite);
         this.takeObjectGraphic(sprite);
         this.tryTakeResourceName(sprite);
@@ -560,7 +567,7 @@ export class BitsyParser
 
     private takeItem(): void
     {
-        const item = new BitsyItem();
+        const item = new BitsyItem(this.world);
         this.takeResourceID(item);
         this.takeObjectGraphic(item);
         this.tryTakeResourceName(item);
@@ -572,7 +579,7 @@ export class BitsyParser
 
     private takeEnding(): void
     {
-        const ending = new BitsyEnding();
+        const ending = new BitsyEnding(this.world);
         this.takeResourceID(ending);
         this.takeDialogueScript(ending);
 
@@ -581,7 +588,7 @@ export class BitsyParser
 
     private takeDialogue(): void
     {
-        const dialogue = new BitsyDialogue();
+        const dialogue = new BitsyDialogue(this.world);
         this.takeResourceID(dialogue);
         this.takeDialogueScript(dialogue);
 
@@ -590,7 +597,7 @@ export class BitsyParser
 
     private takeVariable(): void
     {
-        const variable = new BitsyVariable();
+        const variable = new BitsyVariable(this.world);
         this.takeResourceID(variable);
         variable.value = this.takeLine();
 
