@@ -63,6 +63,8 @@ export interface BitsyObject extends BitsyResource
 {
     graphic: BitsyGraphic;
     palette: number;
+    /** `*` indicates transparent background */
+    paletteBackground?: number | '*';
 }
 
 export class BitsyResourceBase implements BitsyResource
@@ -88,9 +90,11 @@ export class BitsyResourceBase implements BitsyResource
 
 export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
 {
+    static paletteBackgroundDefault: number = 0;
     static paletteDefault: number = 1;
     public graphic: BitsyGraphic = [];
     public palette: number;
+    public paletteBackground: number | "*";
     public dialogueID: string = "";
     public position?: { room: string, x: number, y: number };
     public wall: boolean = false;
@@ -99,6 +103,7 @@ export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
     {
         super(...args);
         this.palette = this.type.paletteDefault;
+        this.paletteBackground = this.type.paletteBackgroundDefault;
     }
     get type()
     {
@@ -129,6 +134,10 @@ export class BitsyObjectBase extends BitsyResourceBase implements BitsyObject
         if (this.palette !== this.type.paletteDefault)
         {
             props.push(`COL ${this.palette}`);
+        }
+        if (this.paletteBackground !== this.type.paletteBackgroundDefault)
+        {
+            props.push(`BGC ${this.paletteBackground}`);
         }
         return props.join('\n');
     };
@@ -379,6 +388,15 @@ export class BitsyParser
         }
     }
 
+    private tryTakePaletteBackground(object: BitsyObject): void
+    {
+        if (this.checkLine("BGC"))
+        {
+            const bgc = this.takeSplitOnce(" ")[1];
+            object.paletteBackground = bgc === '*' ? '*' : parseInt(bgc);
+        }
+    }
+
     private tryTakeObjectDialogueID(object: { "dialogueID": string })
     {
         if (this.checkLine("DLG"))
@@ -548,6 +566,7 @@ export class BitsyParser
         this.tryTakeResourceName(tile);
         this.tryTakeTileWall(tile);
         this.tryTakeObjectPalette(tile);
+        this.tryTakePaletteBackground(tile);
 
         this.world.tiles[tile.id] = tile;
     }
@@ -561,6 +580,7 @@ export class BitsyParser
         this.tryTakeObjectDialogueID(sprite);
         this.tryTakeSpritePosition(sprite);
         this.tryTakeObjectPalette(sprite);
+        this.tryTakePaletteBackground(sprite);
 
         this.world.sprites[sprite.id] = sprite;
     }
@@ -573,6 +593,7 @@ export class BitsyParser
         this.tryTakeResourceName(item);
         this.tryTakeObjectDialogueID(item);
         this.tryTakeObjectPalette(item);
+        this.tryTakePaletteBackground(item);
 
         this.world.items[item.id] = item;
     }
