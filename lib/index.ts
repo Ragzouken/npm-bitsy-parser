@@ -200,6 +200,7 @@ export class BitsyRoom extends BitsyResourceBase
     public endings: { id: string, x: number, y: number }[] = [];
     public palette: string = "";
     public avatar: string = "";
+    public tune: string = "";
 
     public toString()
     {
@@ -213,6 +214,7 @@ export class BitsyRoom extends BitsyResourceBase
             ...this.endings.map(({ id, x, y }) => `END ${id} ${x},${y}`),
             this.palette && `PAL ${this.palette}`,
             this.avatar && `AVA ${this.avatar}`,
+            this.tune && `TUNE ${this.tune}`,
         ].filter(i => i).join('\n');
     }
 }
@@ -478,6 +480,7 @@ export class BitsyParser
         }
         if (this.checkLine("PAL ")) room.palette = this.takeSplitOnce(" ")[1];
         if (this.checkLine("AVA ")) room.avatar = this.takeSplitOnce(" ")[1];
+        if (this.checkLine("TUNE ")) room.tune = this.takeSplitOnce(" ")[1];
 
         this.world.rooms[room.id] = room;
     }
